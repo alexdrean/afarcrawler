@@ -2,13 +2,16 @@ const puppeteer = require("puppeteer")
 const {Webhook, MessageBuilder} = require('discord-webhook-node');
 const {readFileSync, writeFileSync, existsSync} = require("fs");
 const shuffle = require("shuffle-array")
+const cron = require("node-cron")
 
 
 const config = JSON.parse(readFileSync("config.json", {encoding: "utf8"}))
 const hook = new Webhook(config.webhook);
 const _filepath = "history.json";
 
-sendLatest().catch(r => console.error(r))
+cron.schedule('0 * * * *', () => {
+    sendLatest().catch(r => console.error(r))
+})
 
 async function sendLatest() {
     const res = shuffle(await getLatest())
