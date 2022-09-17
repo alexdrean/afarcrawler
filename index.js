@@ -22,7 +22,7 @@ async function sendLatest() {
     for (const item of res) {
         const embed = new MessageBuilder()
             .setTitle(item.titre)
-            .setAuthor(item.phase.author)
+            .setAuthor(item.phase.author, item.phase.authorImage)
             .setColor(item.phase.color)
             .setDescription(item.texte.replaceAll(/^(.+) : (.+)$/gim, "**$1** : $2"))
             .setThumbnail(item.phase.image)
