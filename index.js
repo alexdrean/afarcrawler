@@ -9,9 +9,13 @@ const config = JSON.parse(readFileSync("config.json", {encoding: "utf8"}))
 const hook = new Webhook(config.webhook);
 const _filepath = "history.json";
 
-cron.schedule('0 * * * *', () => {
+if (process.env["DEBUG"]) {
     sendLatest().catch(r => console.error(r))
-})
+} else {
+    cron.schedule('0 * * * *', () => {
+        sendLatest().catch(r => console.error(r))
+    })
+}
 
 async function sendLatest() {
     const res = shuffle(await getLatest())
