@@ -24,7 +24,7 @@ async function sendLatest() {
             .setTitle(item.titre)
             .setAuthor(item.phase.author, item.phase.authorImage)
             .setColor(item.phase.color)
-            .setDescription(item.texte.replaceAll(/^(.+) : (.+)$/gim, "**$1** : $2"))
+            .setDescription(item.phase.prefix + item.texte.replaceAll(/^(.+) : (.+)$/gim, "**$1** : $2"))
             .setThumbnail(item.phase.image)
         await hook.send(embed)
     }
