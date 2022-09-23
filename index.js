@@ -1,12 +1,11 @@
 const puppeteer = require("puppeteer")
-const {Webhook, MessageBuilder} = require('discord-webhook-node');
 const {readFileSync, writeFileSync, existsSync} = require("fs");
 const shuffle = require("shuffle-array")
 const cron = require("node-cron")
+const {Hook} = require("hookcord");
 
 
 const config = JSON.parse(readFileSync("config.json", {encoding: "utf8"}))
-const hook = new Webhook(config.webhook);
 const _filepath = "history.json";
 
 if (process.env["DEBUG"]) {
@@ -20,13 +19,25 @@ if (process.env["DEBUG"]) {
 async function sendLatest() {
     const res = shuffle(await getLatest())
     for (const item of res) {
-        const embed = new MessageBuilder()
-            .setTitle(item.titre)
-            .setAuthor(item.phase.author, item.phase.authorImage)
-            .setColor(item.phase.color)
-            .setDescription(item.phase.prefix + item.texte.replaceAll(/^(.+) : (.+)$/gim, "**$1** : $2"))
-            .setThumbnail(item.phase.image)
-        await hook.send(embed)
+        const payload = {
+            content: item.phase.prefix,
+            embeds: [{
+                title: item.titre,
+                author: {
+                    name: item.phase.author,
+                    icon_url: item.phase.authorImage,
+                },
+                color: parseInt(item.phase.color, 16),
+                description: item.texte.replaceAll(/^(.+) : (.+)$/gim, "**$1** : $2"),
+                thumbnail: {
+                    url: item.phase.image,
+                }
+            }]
+        }
+        await new Hook()
+            .setLink(config.webhook)
+            .setPayload(payload)
+            .fire()
     }
 }
 
