@@ -3,6 +3,7 @@ const {readFileSync, writeFileSync, existsSync} = require("fs");
 const shuffle = require("shuffle-array")
 const cron = require("node-cron")
 const {Hook} = require("hookcord");
+require('log-timestamp');
 
 
 const config = JSON.parse(readFileSync("config.json", {encoding: "utf8"}))
@@ -34,10 +35,13 @@ async function sendLatest() {
                 }
             }]
         }
-        await new Hook()
-            .setLink(config.webhook)
-            .setPayload(payload)
-            .fire()
+        if (!process.env["DO_NOT_SEND"]) {
+            await new Hook()
+                .setLink(config.webhook)
+                .setPayload(payload)
+                .fire()
+        }
+        await addToHistory(item)
     }
 }
 
@@ -47,18 +51,22 @@ async function getLatest() {
         writeFileSync(_filepath, JSON.stringify({items: {}}, null, 4), {encoding: "utf8"})
     }
     let history = JSON.parse(readFileSync(_filepath, {encoding: "utf8"}));
-    if (typeof history.items !== "object")
-        history.items = {}
     const newContents = contents.filter(item => history.items[item.titre] === undefined)
     console.log(Object.keys(history.items).length + " items in history,", newContents.length + " new items")
     if (newContents.length > 0) {
         for (const item of newContents) {
             console.log("Found new item: " + item.titre)
-            history.items[item.titre] = {first_seen: new Date().getTime()}
         }
-        writeFileSync(_filepath, JSON.stringify(history, null, 4), {encoding: "utf8"})
     }
     return newContents
+}
+
+async function addToHistory(item) {
+    let history = JSON.parse(readFileSync(_filepath, {encoding: "utf8"}));
+    if (!history.items) history.items = {}
+    console.log("Saved to history: " + item.titre)
+    history.items[item.titre] = {first_seen: new Date().getTime()}
+    writeFileSync(_filepath, JSON.stringify(history, null, 4), {encoding: "utf8"})
 }
 
 async function getContents() {

@@ -13,6 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "hookcord": "^2.0.2",
+    "log-timestamp": "^0.3.0",
     "node-cron": "^3.0.2",
     "puppeteer": "^17.1.3",
     "shuffle-array": "^1.0.1"
